@@ -9,6 +9,7 @@ namespace Lucky
 	public static class DataManager
 	{
 		private static List<User> users = new List<User>();
+		private static List<Event> events = new List<Event>();
 
 		public static User GetUser(int id)
 		{
@@ -18,6 +19,11 @@ namespace Lucky
 		public static void AddUser(User user)
 		{
 			users.Add(user);
+		}
+
+		public static List<Event> GetEvents()
+		{
+			return events;
 		}
 	}
 }
