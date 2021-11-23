@@ -44,10 +44,9 @@ namespace Lucky
 							Database.Set(insertQuery);
 							user = Database.Get<User>(query)[0];
                         }
-                        user.machine.SetNextState(new_event.Message.Text);
-                        var updateQuery = $"UPDATE public.\"Users\" SET \"currentState\"='{user.machine.currentState.Key}' WHERE id='{id}';";
+						var answer = user.GetAnswer(new MetaInfo(user, new_event.Message.Text));
+						var updateQuery = $"UPDATE public.\"Users\" SET \"currentState\"='{user.machine.currentState.Key}' WHERE id='{id}';";
 						Database.Set(updateQuery);
-                        var answer = user.machine.GetMessage();
                         SendMessage(user.Id, answer, user.machine.GetKeys());
                     }
 				}

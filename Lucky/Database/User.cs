@@ -9,12 +9,7 @@ namespace Lucky
 	{
 		public int Id;
 		public Machine machine;
-
-		public User(int id, State currentState = null)
-		{
-			Id = id;
-			machine = new Machine(currentState);
-		}
+		public int Count;
 
 		public User()
 		{
@@ -25,27 +20,14 @@ namespace Lucky
         {
 			int.TryParse(data[0].ToString(), out Id);
 			machine = new Machine(Machine.GetState(data[1].ToString()));
+			int.TryParse(data[2].ToString(), out Count);
 		}
 
-		public static bool operator ==(User user1, User user2)
-		{
-			if (user1 is null && user2 is null) return true;
-			if (user1 is null || user2 is null) return false;
-			return user1.Id == user2.Id;
-		}
+		public string GetAnswer(MetaInfo metaInfo)
+        {
+			return machine.Update(metaInfo);
+        }
 
-		public static bool operator !=(User user1, User user2)
-		{
-			return !(user1.Id == user2.Id);
-		}
 
-		public override bool Equals(object obj)
-		{
-			if (obj is User user)
-			{
-				return user == this;
-			}
-			return false;
-		}
     }
 }
