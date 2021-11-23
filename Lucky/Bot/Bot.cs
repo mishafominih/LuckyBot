@@ -34,16 +34,22 @@ namespace Lucky
 				{
 					if (new_event.Type == GroupUpdateType.MessageNew)
 					{
-						var user = DataManager.GetUser((int)new_event.Message.FromId);
-						if(user == null)
-						{
-							user = new User((int)new_event.Message.FromId);
-							DataManager.AddUser(user);
-						}
-						user.machine.SetNextState(new_event.Message.Text);
-						var answer = user.machine.GetMessage();
-						SendMessage(user.Id, answer, user.machine.GetKeys());
-					}
+						var id = new_event.Message.FromId;
+						var query = $"SELECT * FROM \"Users\" WHERE id='{id}'";
+						var users = Database.Get<User>(query);
+						var user = users.FirstOrDefault();
+                        if (user == null)
+                        {
+							var insertQuery = $"INSERT INTO public.\"Users\"(id, \"currentState\") VALUES ('{id}', 'Начать заного');";
+							Database.Set(insertQuery);
+							user = Database.Get<User>(query)[0];
+                        }
+                        user.machine.SetNextState(new_event.Message.Text);
+                        var updateQuery = $"UPDATE public.\"Users\" SET \"currentState\"='{user.machine.currentState.Key}' WHERE id='{id}';";
+						Database.Set(updateQuery);
+                        var answer = user.machine.GetMessage();
+                        SendMessage(user.Id, answer, user.machine.GetKeys());
+                    }
 				}
 			}
 		}

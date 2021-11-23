@@ -8,7 +8,7 @@ public class State
 {
 	protected string Message;
 
-	protected string Key;
+	public string Key { get; private set; }
 
 	protected List<State> list_states;
 

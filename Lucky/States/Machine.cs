@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 public class Machine
 {
+	private static List<State> states = new List<State>();
 	private static State start;
 
-	private State currentState;
-	public static void Initialize()
+	public State currentState { get; private set; }
+	static Machine()
 	{
 		var start = new State("Начать заного", "Привет!");
 		var balance = new ActionState("Баланс", "Ваш баланс равен: ", (prev) => "0р");
@@ -21,8 +22,9 @@ public class Machine
 		start.AddStates(new State[] { balance, fillCount, events });
 		events.AddStates(new State[] { calendar, allEvents });
 
-		foreach(var state in new State[]
-			{ balance, fillCount, events, calendar, allEvents, onStart})
+		states.AddRange(new State[] { balance, fillCount, events, calendar, allEvents, onStart });
+
+		foreach(var state in states)
 		{
 			state.AddStates(new State[] { onStart });
 		}
@@ -53,4 +55,13 @@ public class Machine
 	{
 		return currentState.GetKeys();
 	}
+
+	public static State GetState(string key)
+    {
+		foreach( var st in states)
+        {
+			if (st.Key == key) return st;
+        }
+		return null;
+    }
 }

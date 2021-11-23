@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Lucky
 {
-	public class User
+    public class User : IDataType
 	{
 		public int Id;
 		public Machine machine;
@@ -17,7 +16,18 @@ namespace Lucky
 			machine = new Machine(currentState);
 		}
 
-		public static bool operator==(User user1, User user2)
+		public User()
+		{
+
+		}
+
+		public void Fill(List<object> data)
+        {
+			int.TryParse(data[0].ToString(), out Id);
+			machine = new Machine(Machine.GetState(data[1].ToString()));
+		}
+
+		public static bool operator ==(User user1, User user2)
 		{
 			if (user1 is null && user2 is null) return true;
 			if (user1 is null || user2 is null) return false;
@@ -31,11 +41,11 @@ namespace Lucky
 
 		public override bool Equals(object obj)
 		{
-			if(obj is User user)
+			if (obj is User user)
 			{
 				return user == this;
 			}
 			return false;
 		}
-	}
+    }
 }

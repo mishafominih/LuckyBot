@@ -13,10 +13,12 @@ namespace Lucky
 	{
 		public static void Main(string[] args)
 		{
-			Machine.Initialize();
+			Database.Connect();
+			//Machine.Initialize();
 			Bot.Authorize();
+			Database.Close();
 			Console.ReadLine();
-			CreateHostBuilder(args).Build().Run();
+			//CreateHostBuilder(args).Build().Run();
 		}
 
 		public static IHostBuilder CreateHostBuilder(string[] args) =>
