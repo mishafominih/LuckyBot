@@ -90,13 +90,6 @@ namespace Lucky
 			return keyboard.SetInline(false)
 				.SetOneTime()
 				.Build();
-
-			//.AddButton("Подтвердить", "btnValue", KeyboardButtonColor.Primary)
-			//.SetInline(false)
-			//.SetOneTime()
-			//.AddLine()
-			//.AddButton("Отменить", "btnValue", KeyboardButtonColor.Primary)
-			//.Build();
 		}
 	}
 }
