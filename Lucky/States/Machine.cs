@@ -18,11 +18,11 @@ namespace Lucky
 			var balance = new State("Баланс", (meta) => $"Ваш баланс равен: {meta.User.Count}");
 			var fillCount = new State("Пополнить баланс", (meta) =>
 			{
-				var updateQuery = $"UPDATE public.\"Users\" SET \"count\"='{meta.User.Count + 10}' WHERE id='{meta.User.Id}';";
-				Database.Set(updateQuery);
+				meta.User.Count += 10;
+				meta.User.Update();
 				return "Баланс увеличен";
 			});
-			var events = new State("События", (meta) =>
+			var events = new State("Все события", (meta) =>
 			{
 				var query = $"SELECT * FROM \"Events\"";
 				var events = Database.Get<Event>(query);
@@ -34,19 +34,68 @@ namespace Lucky
 				}
 				return "На этом все)";
 			});
-			var calendar = new State("Расписание", (meta) => "В данное время расписание недоступно");
-			var allEvents = new State("Мои события", (meta) => "В данное время никаких событий нет");
+			var subscription = new State("Записаться на событие", (meta) => "Введите название события");
+			var trySubscription = new State("", (meta) =>
+			{
+				var query = $"SELECT * " +
+							$"FROM \"Events\"" +
+							$"WHERE name='{meta.Message}'";
+				var events = Database.Get<Event>(query);
+				if (events.Count == 0) return "Не удалось найти такое событие";
+				if (meta.User.Count < events[0].Cost) return "Упс:( Не достаточно средств на вашем счете для записи на событие";
+				query = $"INSERT INTO public.\"UsersEvents\"(\"user\", \"event\") VALUES ('{meta.User.Id}', '{events[0].Id}');";
+				Database.Set(query);
+				meta.User.Count -= events.Count;
+				meta.User.Update();
+				return "Вы успешно записались на событие";
+			});
+			var unsubscription = new State("Отписаться от события", (meta) => "Введите название события");
+			var tryUnsubscription = new State("", (meta) =>
+			{
+				var query = $"SELECT * " +
+							$"FROM \"Events\"" +
+							$"WHERE name='{meta.Message}'";
+				var events = Database.Get<Event>(query);
+				if (events.Count == 0) return "Не удалось найти такое событие";
+				query = $"DELETE FROM public.\"UsersEvents\" WHERE \"user\"='{meta.User.Id}' AND \"event\"='{events[0].Id}'; ";
+				Database.Set(query);
+				meta.User.Count += events.Count;
+				meta.User.Update();
+				return "Вы успешно отписались от события";
+			});
+			var myEvents = new State("Мои события", (meta) =>
+			{
+				var query = $"SELECT * " +
+							$"FROM \"Events\"" +
+							$"WHERE \"id\"=(" +
+							$"	SELECT event" +
+							$"	FROM \"UsersEvents\"" +
+							$"	WHERE \"user\"='{meta.User.Id}' AND \"event\"=id)";
+				var events = Database.Get<Event>(query);
+				foreach(var e in events)
+                {
+					Bot.SendMessage(meta.User.Id, e.ToString());
+				}
+				return "На этом все)";
+			});
 			start.AddStates(new State[] { balance, fillCount, events });
-			events.AddStates(new State[] { calendar, allEvents });
-
-			states.AddRange(new State[] { balance, fillCount, events, calendar, allEvents });
-
+			events.AddStates(new State[] { myEvents, subscription });
+			subscription.AddStates(new State[] { trySubscription });
+			trySubscription.AddStates(new State[] { start });
+			states.AddRange(new State[] { balance, fillCount, events, myEvents });
+			myEvents.AddStates(new State[] { unsubscription });
+			unsubscription.AddStates(new State[] { tryUnsubscription });
+			tryUnsubscription.AddStates(new State[] { start });
 			foreach (var state in states)
 			{
 				state.AddStates(new State[] { start });
 			}
 
 			states.Add(start);
+			states.Add(subscription);
+			states.Add(trySubscription);
+			states.Add(unsubscription);
+			states.Add(tryUnsubscription);
 			Machine.start = start;
 		}
 

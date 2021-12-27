@@ -5,6 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Money\**" />
+    <Content Remove="Money\**" />
+    <EmbeddedResource Remove="Money\**" />
+    <None Remove="Money\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Npgsql" Version="6.0.0" />
     <PackageReference Include="VkNet" Version="1.66.0" />
   </ItemGroup>

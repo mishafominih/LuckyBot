@@ -35,18 +35,15 @@ namespace Lucky
 					if (new_event.Type == GroupUpdateType.MessageNew)
 					{
 						var id = new_event.Message.FromId;
-						var query = $"SELECT * FROM \"Users\" WHERE id='{id}'";
-						var users = Database.Get<User>(query);
-						var user = users.FirstOrDefault();
+						var user = User.Get(id);
                         if (user == null)
                         {
 							var insertQuery = $"INSERT INTO public.\"Users\"(id, \"currentState\") VALUES ('{id}', 'Начать заного');";
 							Database.Set(insertQuery);
-							user = Database.Get<User>(query)[0];
-                        }
+							user = User.Get(id);
+						}
 						var answer = user.GetAnswer(new MetaInfo(user, new_event.Message.Text));
-						var updateQuery = $"UPDATE public.\"Users\" SET \"currentState\"='{user.machine.currentState.Key}' WHERE id='{id}';";
-						Database.Set(updateQuery);
+						user.Update();
                         SendMessage(user.Id, answer, user.machine.GetKeys());
                     }
 				}
@@ -55,6 +52,7 @@ namespace Lucky
 
 		public static void SendMessage(int userId, string message, List<string> buttons = null)
 		{
+			if (message == null || message == "") return;
 			var rand = new Random();
 			var parameters = new MessagesSendParams();
 
@@ -77,9 +75,17 @@ namespace Lucky
 		{
 			if (buttons == null || buttons.Count == 0) return new KeyboardBuilder().Build();
 			var keyboard = new KeyboardBuilder();
+			var buttonsCount = 2;
+			var counter = 0;
 			foreach(var btn in buttons)
 			{
+				if(counter == buttonsCount)
+                {
+					keyboard.AddLine();
+					counter = 0;
+                }
 				keyboard.AddButton(btn, btn);
+				counter++;
 			}
 			return keyboard.SetInline(false)
 				.SetOneTime()

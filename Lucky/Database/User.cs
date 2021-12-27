@@ -28,6 +28,20 @@ namespace Lucky
 			return machine.Update(metaInfo);
         }
 
+		public static User Get(long? id)
+		{
+			var query = $"SELECT * FROM \"Users\" WHERE id='{id}'";
+			var users = Database.Get<User>(query);
+			return users.FirstOrDefault();
+		}
 
-    }
+		public void Update()
+		{
+			var updateQuery = $"UPDATE public.\"Users\" " +
+							  $"SET \"currentState\"='{machine.currentState.Key}'" +
+							  $", \"count\"='{Count}' " +
+							  $"WHERE id='{Id}';";
+			Database.Set(updateQuery);
+		}
+	}
 }

@@ -40,6 +40,7 @@ namespace Lucky {
 		{
 			return list_states
 				.Select(state => state.Key)
+				.Where(key => key != null && key != "")
 				.ToList();
 		}
 	} 
